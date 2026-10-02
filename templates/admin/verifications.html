@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}Administrator Verifications - MentorConnect{% endblock %}
+
+{% block content %}
+<div class="dashboard-container container">
+
+    <!-- Admin Header Banner -->
+    <div class="dashboard-welcome-banner" style="background: linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #312e81 100%);">
+        <div class="welcome-info">
+            <span class="welcome-badge">🛡️ Administration Portal</span>
+            <h1 class="welcome-title">Member Verification Management</h1>
+            <p class="welcome-subtitle">
+                Review submitted Government Photo IDs and College Student ID cards. Authorize verified mentors to appear in public discovery and allow verified students to request 1-on-1 mentorship.
+            </p>
+        </div>
+        <div class="quick-actions-bar">
+            <span class="btn btn-ghost-white" style="cursor: default;">
+                ⏳ {{ pending_mentors|length }} Mentors Pending
+            </span>
+            <span class="btn btn-ghost-white" style="cursor: default;">
+                ⏳ {{ pending_students|length }} Students Pending
+            </span>
+        </div>
+    </div>
+
+    <!-- 1. MENTOR VERIFICATION PANEL -->
+    <div class="dash-panel" id="mentor-verifications" style="margin-bottom: 2.75rem;">
+        <div class="dash-panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3>💼 Mentor Verifications ({{ mentors|length }})</h3>
+                <span style="font-size: 0.85rem; color: var(--gray-500);">Verify professional credentials & photo ID proofs</span>
+            </div>
+            <span class="user-badge" style="background: #eef2ff; color: var(--primary);">
+                Mentors
+            </span>
+        </div>
+
+        <div class="dash-panel-body" style="padding: 1.5rem;">
+            {% if mentors and mentors|length > 0 %}
+                <div class="requests-list">
+                    {% for m in mentors %}
+                        <div class="request-card" style="border-left: 4px solid {% if m.verification_status == 'Verified' %}#10b981{% elif m.verification_status == 'Rejected' %}#ef4444{% else %}#f59e0b{% endif %}; background: white; margin-bottom: 1.25rem;">
+                            
+                            <div class="request-card-header" style="align-items: center;">
+                                <div class="request-sender-info">
+                                    <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-900);">
+                                        {{ m.name }}
+                                    </h4>
+                                    <p style="font-size: 0.88rem; color: var(--gray-600); margin-top: 0.2rem;">
+                                        ✉️ <strong>{{ m.email }}</strong> &bull; Registered ID: #{{ m.id }}
+                                    </p>
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    {% if m.verification_status == 'Verified' %}
+                                        <span class="status-badge status-accepted">✓ Verified</span>
+                                    {% elif m.verification_status == 'Rejected' %}
+                                        <span class="status-badge status-rejected">❌ Rejected</span>
+                                    {% else %}
+                                        <span class="status-badge status-pending">⏳ Pending Review</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Mentor Details Grid -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: var(--gray-50); padding: 1rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin: 0.85rem 0;">
+                                <div>
+                                    <span style="font-size: 0.76rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;">Professional Title:</span>
+                                    <div style="font-size: 0.92rem; font-weight: 600; color: var(--dark-800);">{{ m.title or 'Not specified' }}</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.76rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;">Company / Org:</span>
+                                    <div style="font-size: 0.92rem; font-weight: 600; color: var(--dark-800);">{{ m.company or 'Not specified' }}</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.76rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;">Experience:</span>
+                                    <div style="font-size: 0.92rem; font-weight: 600; color: var(--dark-800);">{{ m.experience or 'Not specified' }}</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.76rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;">Skills:</span>
+                                    <div style="font-size: 0.92rem; font-weight: 600; color: var(--primary);">{{ m.skills or 'None listed' }}</div>
+                                </div>
+                            </div>
+
+                            {% if m.bio %}
+                                <div style="font-size: 0.88rem; color: var(--gray-600); line-height: 1.5; margin-bottom: 1rem;">
+                                    <strong>Bio:</strong> {{ m.bio }}
+                                </div>
+                            {% endif %}
+
+                            <!-- Verification Actions & Document Review Bar -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--gray-200);">
+                                <div>
+                                    {% if m.id_proof_filename %}
+                                        <a href="{{ url_for('view_verification_document', user_id=m.id) }}" target="_blank" class="btn btn-sm btn-outline" style="border-color: var(--primary); color: var(--primary);">
+                                            📄 View Uploaded Photo ID Proof &nearr;
+                                        </a>
+                                        <span style="font-size: 0.8rem; color: var(--gray-500); margin-left: 0.5rem;">(Confidential Document)</span>
+                                    {% else %}
+                                        <span style="font-size: 0.85rem; color: var(--gray-400);">No ID document file on record</span>
+                                    {% endif %}
+                                </div>
+
+                                <div style="display: flex; gap: 0.65rem;">
+                                    {% if m.verification_status != 'Verified' %}
+                                        <form action="{{ url_for('approve_mentor_verification', user_id=m.id) }}" method="POST" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                ✓ Approve Mentor
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    {% if m.verification_status != 'Rejected' %}
+                                        <form action="{{ url_for('reject_mentor_verification', user_id=m.id) }}" method="POST" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                ✕ Reject
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <span class="empty-icon">💼</span>
+                    <h4>No Mentor Accounts Registered</h4>
+                    <p>New mentors will appear here once they register with their photo ID proof.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 2. STUDENT / MENTEE VERIFICATION PANEL -->
+    <div class="dash-panel" id="student-verifications">
+        <div class="dash-panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3>🎓 Student / Mentee Verifications ({{ students|length }})</h3>
+                <span style="font-size: 0.85rem; color: var(--gray-500);">Review college affiliation & student ID cards</span>
+            </div>
+            <span class="user-badge" style="background: #e0f2fe; color: #0284c7;">
+                Students
+            </span>
+        </div>
+
+        <div class="dash-panel-body" style="padding: 1.5rem;">
+            {% if students and students|length > 0 %}
+                <div class="requests-list">
+                    {% for s in students %}
+                        <div class="request-card" style="border-left: 4px solid {% if s.verification_status == 'Verified' %}#10b981{% elif s.verification_status == 'Rejected' %}#ef4444{% else %}#f59e0b{% endif %}; background: white; margin-bottom: 1.25rem;">
+                            
+                            <div class="request-card-header" style="align-items: center;">
+                                <div class="request-sender-info">
+                                    <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-900);">
+                                        {{ s.name }}
+                                    </h4>
+                                    <p style="font-size: 0.88rem; color: var(--gray-600); margin-top: 0.2rem;">
+                                        ✉️ <strong>{{ s.email }}</strong> &bull; Registered ID: #{{ s.id }}
+                                    </p>
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    {% if s.verification_status == 'Verified' %}
+                                        <span class="status-badge status-accepted">✓ Verified Student</span>
+                                    {% elif s.verification_status == 'Rejected' %}
+                                        <span class="status-badge status-rejected">❌ Rejected</span>
+                                    {% else %}
+                                        <span class="status-badge status-pending">⏳ Pending Review</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Student College Details -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: var(--gray-50); padding: 1rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); margin: 0.85rem 0;">
+                                <div>
+                                    <span style="font-size: 0.76rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;">College / University:</span>
+                                    <div style="font-size: 0.95rem; font-weight: 700; color: var(--dark-900);">{{ s.college_name or 'Not specified' }}</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.76rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;">College Email:</span>
+                                    <div style="font-size: 0.92rem; font-weight: 600; color: var(--dark-800);">{{ s.college_email or 'Not provided' }}</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.76rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;">Verified Date:</span>
+                                    <div style="font-size: 0.88rem; color: var(--gray-600);">{{ s.verified_at[:16] if s.verified_at else 'Pending Approval' }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Actions & Document Review Bar -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--gray-200);">
+                                <div>
+                                    {% if s.college_id_filename %}
+                                        <a href="{{ url_for('view_verification_document', user_id=s.id) }}" target="_blank" class="btn btn-sm btn-outline" style="border-color: #0284c7; color: #0284c7;">
+                                            🎓 View Uploaded Student ID Card &nearr;
+                                        </a>
+                                        <span style="font-size: 0.8rem; color: var(--gray-500); margin-left: 0.5rem;">(Confidential Document)</span>
+                                    {% else %}
+                                        <span style="font-size: 0.85rem; color: var(--gray-400);">No student ID file on record</span>
+                                    {% endif %}
+                                </div>
+
+                                <div style="display: flex; gap: 0.65rem;">
+                                    {% if s.verification_status != 'Verified' %}
+                                        <form action="{{ url_for('approve_student_verification', user_id=s.id) }}" method="POST" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                ✓ Approve Student
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    {% if s.verification_status != 'Rejected' %}
+                                        <form action="{{ url_for('reject_student_verification', user_id=s.id) }}" method="POST" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                ✕ Reject
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <span class="empty-icon">🎓</span>
+                    <h4>No Student Accounts Registered</h4>
+                    <p>New students will appear here once they register with their college ID card.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

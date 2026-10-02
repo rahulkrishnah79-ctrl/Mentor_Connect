@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - MentorConnect{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card" style="max-width: 620px;">
+        <div class="auth-header">
+            <h2 class="auth-title">Create an Account</h2>
+            <p class="auth-subtitle">Join MentorConnect as an industry Mentor or ambitious Student</p>
+        </div>
+
+        <form action="{{ url_for('register') }}" method="POST" enctype="multipart/form-data" class="auth-form" novalidate id="registerForm">
+            <!-- Full Name -->
+            <div class="form-group">
+                <label for="name" class="form-label">Full Name <span style="color: var(--danger);">*</span></label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    class="form-control" 
+                    placeholder="e.g. Alex Morgan" 
+                    value="{{ name|default('') }}" 
+                    maxlength="120"
+                    required
+                >
+            </div>
+
+            <!-- Email Address -->
+            <div class="form-group">
+                <label for="email" class="form-label">Account Email Address <span style="color: var(--danger);">*</span></label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-control" 
+                    placeholder="name@example.com" 
+                    value="{{ email|default('') }}" 
+                    maxlength="254"
+                    required
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label for="password" class="form-label">Password <span style="color: var(--danger);">*</span></label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-control" 
+                    placeholder="At least 8 characters" 
+                    required
+                >
+                <small class="form-hint">Must be at least 8 characters long.</small>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="form-group">
+                <label class="form-label">Select Your Role: <span style="color: var(--danger);">*</span></label>
+                <div class="role-grid">
+                    <label class="role-option">
+                        <input 
+                            type="radio" 
+                            name="role" 
+                            value="mentee" 
+                            id="roleMentee"
+                            {% if selected_role != 'mentor' %}checked{% endif %}
+                            onchange="updateRoleFields()"
+                        >
+                        <div class="role-box">
+                            <span class="role-icon">🎓</span>
+                            <div class="role-title">Mentee / Student</div>
+                            <p class="role-desc">Looking for career guidance and 1-on-1 coaching</p>
+                        </div>
+                    </label>
+
+                    <label class="role-option">
+                        <input 
+                            type="radio" 
+                            name="role" 
+                            value="mentor" 
+                            id="roleMentor"
+                            {% if selected_role == 'mentor' %}checked{% endif %}
+                            onchange="updateRoleFields()"
+                        >
+                        <div class="role-box">
+                            <span class="role-icon">💼</span>
+                            <div class="role-title">Mentor</div>
+                            <p class="role-desc">Ready to share expertise and guide students</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ================= Mentee / Student Specific Fields ================= -->
+            <div id="menteeFields" style="display: {% if selected_role != 'mentor' %}block{% else %}none{% endif %}; border-top: 1px dashed var(--gray-200); padding-top: 1.25rem;">
+                <h4 style="font-size: 1rem; font-weight: 800; color: var(--dark-900); margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
+                    🎓 Student Verification Details
+                </h4>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="college_name" class="form-label">College / University Name <span style="color: var(--danger);">*</span></label>
+                    <input 
+                        type="text" 
+                        id="college_name" 
+                        name="college_name" 
+                        class="form-control" 
+                        placeholder="e.g. Stanford University or MIT"
+                        value="{{ college_name|default('') }}"
+                        maxlength="150"
+                    >
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="college_email" class="form-label">College Email (optional)</label>
+                    <input 
+                        type="email" 
+                        id="college_email" 
+                        name="college_email" 
+                        class="form-control" 
+                        placeholder="e.g. student@college.edu"
+                        value="{{ college_email|default('') }}"
+                        maxlength="254"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="college_id_proof" class="form-label">College Student ID Card Upload <span style="color: var(--danger);">*</span></label>
+                    <input 
+                        type="file" 
+                        id="college_id_proof" 
+                        name="college_id_proof" 
+                        class="form-control" 
+                        accept=".png,.jpg,.jpeg,.pdf"
+                    >
+                    <small class="form-hint">Accepted formats: PNG, JPG, JPEG, PDF (Max size: 5MB). Kept strictly confidential for verification only.</small>
+                </div>
+            </div>
+
+            <!-- ================= Mentor Specific Fields ================= -->
+            <div id="mentorFields" style="display: {% if selected_role == 'mentor' %}block{% else %}none{% endif %}; border-top: 1px dashed var(--gray-200); padding-top: 1.25rem;">
+                <h4 style="font-size: 1rem; font-weight: 800; color: var(--dark-900); margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
+                    💼 Mentor Profile & Professional Verification
+                </h4>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="title" class="form-label">Professional Title <span style="color: var(--danger);">*</span></label>
+                        <input 
+                            type="text" 
+                            id="title" 
+                            name="title" 
+                            class="form-control" 
+                            placeholder="e.g. Senior Software Engineer"
+                            value="{{ title|default('') }}"
+                            maxlength="150"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="company" class="form-label">Company / Organization</label>
+                        <input 
+                            type="text" 
+                            id="company" 
+                            name="company" 
+                            class="form-control" 
+                            placeholder="e.g. Google or Tech Startup"
+                            value="{{ company|default('') }}"
+                            maxlength="150"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="skills" class="form-label">Key Skills & Technologies (comma-separated) <span style="color: var(--danger);">*</span></label>
+                    <input 
+                        type="text" 
+                        id="skills" 
+                        name="skills" 
+                        class="form-control" 
+                        placeholder="e.g. Python, Flask, React, AWS, Docker"
+                        value="{{ skills|default('') }}"
+                        maxlength="300"
+                    >
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="experience" class="form-label">Years of Experience</label>
+                    <input 
+                        type="text" 
+                        id="experience" 
+                        name="experience" 
+                        class="form-control" 
+                        placeholder="e.g. 5+ years"
+                        value="{{ experience|default('') }}"
+                        maxlength="300"
+                    >
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="bio" class="form-label">Short Professional Bio</label>
+                    <textarea 
+                        id="bio" 
+                        name="bio" 
+                        rows="3" 
+                        class="form-control" 
+                        placeholder="Share a brief overview of your background and what you can help mentees with..."
+                        maxlength="2000"
+                    >{{ bio|default('') }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_proof" class="form-label">Photo ID Proof Upload <span style="color: var(--danger);">*</span></label>
+                    <input 
+                        type="file" 
+                        id="id_proof" 
+                        name="id_proof" 
+                        class="form-control" 
+                        accept=".png,.jpg,.jpeg,.pdf"
+                    >
+                    <small class="form-hint">Government/Work Photo ID (PNG, JPG, JPEG, PDF up to 5MB). Used solely for admin verification and never displayed publicly.</small>
+                </div>
+            </div>
+
+            <!-- Privacy Guarantee Callout -->
+            <div style="background: var(--gray-50); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 0.75rem 1rem; display: flex; align-items: flex-start; gap: 0.65rem; margin-top: 0.5rem;">
+                <span style="font-size: 1.1rem; line-height: 1;">🔒</span>
+                <span style="font-size: 0.82rem; color: var(--gray-600); line-height: 1.45;">
+                    <strong>Verification Privacy Guarantee:</strong> Your uploaded documents are stored in a private directory, never displayed on public profile cards, and strictly reviewed by platform administrators.
+                </span>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 0.5rem;">
+                Submit Registration for Verification
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
+        </div>
+    </div>
+</section>
+
+<script>
+function updateRoleFields() {
+    const isMentor = document.getElementById('roleMentor').checked;
+    document.getElementById('mentorFields').style.display = isMentor ? 'block' : 'none';
+    document.getElementById('menteeFields').style.display = isMentor ? 'none' : 'block';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ mentor.name }} - Mentor Profile - MentorConnect{% endblock %}
+
+{% block content %}
+<section class="section" style="padding: 3rem 0 5rem 0;">
+    <div class="container" style="max-width: 960px;">
+        
+        <!-- Breadcrumb / Back button -->
+        <div style="margin-bottom: 1.5rem;">
+            <a href="{{ url_for('mentor_list') }}" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+                &larr; Back to Mentor Directory
+            </a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;" class="profile-layout">
+            
+            <!-- Left Column: Main Profile Details -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- Profile Header Card -->
+                <div class="dash-panel" style="padding: 2rem;">
+                    <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+                        {% if mentor.profile_pic_url %}
+                            <img src="{{ mentor.profile_pic_url }}" alt="{{ mentor.name }}" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-light);">
+                        {% else %}
+                            <div class="mentor-avatar" style="width: 90px; height: 90px; font-size: 2rem;">
+                                {{ mentor.name[:2]|upper }}
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            {% if mentor.verification_status == 'Verified' %}
+                                <div class="dashboard-badge mentor-badge">✓ Verified Mentor</div>
+                            {% else %}
+                                <div class="dashboard-badge" style="background:#fef3c7; color:#92400e;">⏳ Verification {{ mentor.verification_status or 'Pending' }}</div>
+                            {% endif %}
+                            <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--dark-900);">
+                                {{ mentor.name }}
+                            </h1>
+                            <p style="font-size: 1.05rem; color: var(--primary); font-weight: 600;">
+                                {{ mentor.title or 'Industry Mentor' }}
+                                {% if mentor.company %}
+                                    <span style="color: var(--gray-500); font-weight: 400;">at</span> {{ mentor.company }}
+                                {% endif %}
+                            </p>
+                            
+                            {% if mentor.linkedin_url %}
+                                <div style="margin-top: 0.5rem;">
+                                    <a href="{{ mentor.linkedin_url }}" target="_blank" rel="noopener noreferrer" style="color: #0077b5; font-size: 0.9rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                        🔗 LinkedIn Profile &rarr;
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About & Bio Card -->
+                <div class="dash-panel" style="padding: 2rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--dark-900);">
+                        About Me
+                    </h3>
+                    <p style="color: var(--gray-600); line-height: 1.7; font-size: 0.98rem; white-space: pre-line;">
+                        {{ mentor.bio or 'This mentor has not provided a detailed bio yet.' }}
+                    </p>
+                </div>
+
+                <!-- Skills & Technologies -->
+                <div class="dash-panel" style="padding: 2rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--dark-900);">
+                        Expertise & Skills
+                    </h3>
+                    {% if mentor.skills %}
+                        <div class="mentor-skills" style="gap: 0.6rem;">
+                            {% for skill in mentor.skills.split(',') %}
+                                {% if skill.strip() %}
+                                    <span class="skill-tag" style="font-size: 0.88rem; padding: 0.35rem 0.8rem;">
+                                        {{ skill.strip() }}
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="color: var(--gray-500); font-size: 0.9rem;">No specific skills listed.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Experience & Education Card -->
+                <div class="dash-panel" style="padding: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div>
+                            <h4 style="font-size: 1rem; font-weight: 700; color: var(--dark-900); margin-bottom: 0.5rem;">
+                                💼 Experience
+                            </h4>
+                            <p style="color: var(--gray-600); font-size: 0.92rem;">
+                                {{ mentor.experience or 'Experience details not specified.' }}
+                            </p>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1rem; font-weight: 700; color: var(--dark-900); margin-bottom: 0.5rem;">
+                                🎓 Education
+                            </h4>
+                            <p style="color: var(--gray-600); font-size: 0.92rem;">
+                                {{ mentor.education or 'Education details not specified.' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Mentorship Request / Connect Card -->
+            <div>
+                <div class="dash-panel" style="padding: 1.75rem; position: sticky; top: 90px;">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--dark-900);">
+                        Mentorship Details
+                    </h3>
+
+                    <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--gray-200);">
+                        <span style="font-size: 0.85rem; color: var(--gray-500); display: block; margin-bottom: 0.25rem;">Availability</span>
+                        <div style="font-weight: 600; color: var(--dark-800); font-size: 0.95rem;">
+                            🕒 {{ mentor.availability or 'Flexible / By Request' }}
+                        </div>
+                    </div>
+
+                    <!-- Contextual Request Form or Action -->
+                    {% if session.get('user_id') == mentor.user_id %}
+                        <!-- Self View -->
+                        <div class="alert alert-info" style="font-size: 0.85rem; margin-bottom: 1rem;">
+                            This is your public profile.
+                        </div>
+                        <a href="{{ url_for('edit_mentor_profile') }}" class="btn btn-primary btn-block">
+                            Edit My Profile
+                        </a>
+
+                    {% elif session.get('user_role') == 'mentee' %}
+                        <!-- Mentee View: Check Verification State First -->
+                        {% if mentor.verification_status != 'Verified' %}
+                            <div class="alert alert-warning" style="flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="status-badge status-pending">{% if mentor.verification_status == 'Rejected' %}DECLINED{% else %}PENDING VERIFICATION{% endif %}</span>
+                                    <strong>Mentor Not Yet Verified</strong>
+                                </div>
+                                <p style="font-size: 0.85rem; margin-top: 0.35rem;">
+                                    {{ mentor.name }} is currently undergoing administrative verification and cannot receive mentorship requests at this time.
+                                </p>
+                            </div>
+
+                        {% elif mentee_verification_status and mentee_verification_status != 'Verified' %}
+                            <div class="alert alert-warning" style="flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="status-badge status-pending">STUDENT VERIFICATION PENDING</span>
+                                    <strong>Student ID Verification Required</strong>
+                                </div>
+                                <p style="font-size: 0.85rem; margin-top: 0.35rem;">
+                                    Your student account is currently pending administrative verification. Once your student ID card is approved, you will be able to request mentorship.
+                                </p>
+                            </div>
+
+                        {% elif existing_request and existing_request.status == 'PENDING' %}
+                            <div class="alert alert-warning" style="flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="status-badge status-pending">PENDING</span>
+                                    <strong>Request Sent</strong>
+                                </div>
+                                <p style="font-size: 0.85rem; margin-top: 0.35rem;">
+                                    You have already sent a request to {{ mentor.name }}. You will be notified when they accept or reject it.
+                                </p>
+                            </div>
+
+                        {% elif existing_request and existing_request.status == 'ACCEPTED' %}
+                            <div class="alert alert-success" style="flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="status-badge status-accepted">ACCEPTED</span>
+                                    <strong>Connected!</strong>
+                                </div>
+                                <p style="font-size: 0.85rem; margin-top: 0.35rem;">
+                                    {{ mentor.name }} accepted your mentorship request!
+                                </p>
+                            </div>
+                            <a href="{{ url_for('mentee_dashboard') }}" class="btn btn-success btn-block">
+                                View in Mentee Dashboard
+                            </a>
+
+                        {% else %}
+                            <!-- Verified Mentee can send a new request to Verified Mentor -->
+                            <div style="margin-top: 1rem;">
+                                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--dark-900); margin-bottom: 0.5rem;">
+                                    Request Mentorship
+                                </h4>
+                                <p style="font-size: 0.82rem; color: var(--gray-600); margin-bottom: 0.75rem;">
+                                    Send a short message explaining what you would like guidance on.
+                                </p>
+                                
+                                <form action="{{ url_for('send_mentorship_request', mentor_id=mentor.user_id) }}" method="POST">
+                                    <div class="form-group" style="margin-bottom: 0.75rem;">
+                                        <textarea 
+                                            name="message" 
+                                            rows="4" 
+                                            class="form-control" 
+                                            placeholder="Hi {{ mentor.name }}, I am learning web development and would love your guidance on..." 
+                                            maxlength="1000"
+                                            required
+                                        ></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        Send Request
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+
+                    {% elif not session.get('user_id') %}
+                        <!-- Unauthenticated guest -->
+                        <div class="alert alert-info" style="font-size: 0.85rem; margin-bottom: 1rem;">
+                            Log in as a mentee to send a mentorship request to {{ mentor.name }}.
+                        </div>
+                        <a href="{{ url_for('login') }}" class="btn btn-primary btn-block">
+                            Log In to Request Mentorship
+                        </a>
+                    {% else %}
+                        <p style="font-size: 0.85rem; color: var(--gray-500); text-align: center;">
+                            Logged in as a Mentor.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

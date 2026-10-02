@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Session with {{ mentor.name }} - MentorConnect{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card" style="max-width: 620px;">
+        <div class="auth-header">
+            <div class="dashboard-badge mentee-badge">📅 Schedule Mentorship</div>
+            <h2 class="auth-title">Book a 1-on-1 Session</h2>
+            <p class="auth-subtitle">
+                Schedule your session with <strong>{{ mentor.name }}</strong> ({{ mentor.title or 'Mentor' }}{% if mentor.company %} at {{ mentor.company }}{% endif %}).
+            </p>
+        </div>
+
+        {% if mentor.availability %}
+            <div class="alert alert-info" style="font-size: 0.9rem; margin-bottom: 1.5rem;">
+                🕒 <strong>Mentor's Stated Availability:</strong> {{ mentor.availability }}
+            </div>
+        {% endif %}
+
+        <form action="{{ url_for('book_session', request_id=request_record.id) }}" method="POST" class="auth-form">
+            <!-- Date & Time (2 columns) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="session_date" class="form-label">Session Date</label>
+                    <input 
+                        type="date" 
+                        id="session_date" 
+                        name="session_date" 
+                        class="form-control" 
+                        min="{{ today }}" 
+                        required
+                    >
+                    <small class="form-hint">Must be today or a future date.</small>
+                </div>
+                <div class="form-group">
+                    <label for="session_time" class="form-label">Preferred Time</label>
+                    <input 
+                        type="time" 
+                        id="session_time" 
+                        name="session_time" 
+                        class="form-control" 
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- Topic -->
+            <div class="form-group">
+                <label for="topic" class="form-label">Session Topic / Goal</label>
+                <input 
+                    type="text" 
+                    id="topic" 
+                    name="topic" 
+                    class="form-control" 
+                    placeholder="e.g. Mock Technical Interview, Resume Review, Flask Architecture" 
+                    maxlength="200"
+                    required
+                >
+            </div>
+
+            <!-- Description / Agenda -->
+            <div class="form-group">
+                <label for="description" class="form-label">Session Agenda / Specific Questions</label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    rows="4" 
+                    class="form-control" 
+                    placeholder="Provide details or links (e.g. GitHub repo, resume link, specific problems you want help with)..."
+                    maxlength="1000"
+                ></textarea>
+            </div>
+
+            <!-- Submit & Cancel -->
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary btn-lg" style="flex: 2;">
+                    Confirm & Schedule Session
+                </button>
+                <a href="{{ url_for('mentee_dashboard') }}" class="btn btn-outline btn-lg" style="flex: 1; text-align: center;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

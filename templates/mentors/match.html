@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Mentor Matching - MentorConnect{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 3rem; padding-bottom: 5rem;">
+    <div class="container">
+        
+        <!-- Header & Explanation -->
+        <div class="section-header" style="max-width: 720px; margin-bottom: 2.5rem;">
+            <span class="section-tag">🎯 Smart Recommendation</span>
+            <h1 class="section-title">Mentor Skill Matching</h1>
+            <p class="section-subtitle">
+                Enter or select your desired skills and technologies. Our matching algorithm compares your interests against mentor profiles and ranks mentors by overlapping skill percentage.
+            </p>
+        </div>
+
+        <!-- How It Works Callout -->
+        <div class="dash-panel" style="max-width: 820px; margin: 0 auto 2.5rem auto; padding: 1.5rem 1.75rem; background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border-left: 4px solid var(--primary);">
+            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                <span style="font-size: 1.6rem; line-height: 1;">💡</span>
+                <div>
+                    <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--dark-900); margin-bottom: 0.35rem;">
+                        How the Matching Percentage is Calculated
+                    </h4>
+                    <p style="font-size: 0.88rem; color: var(--gray-600); line-height: 1.55; margin-bottom: 0.4rem;">
+                        The algorithm counts how many of <strong>your requested skills</strong> the mentor possesses, divided by your <strong>total requested skills</strong>:
+                    </p>
+                    <div style="background: white; padding: 0.6rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--gray-200); font-family: monospace; font-size: 0.88rem; color: var(--primary); font-weight: 700; display: inline-block;">
+                        Match Score = (Overlapping Skills Count ÷ Your Total Desired Skills) × 100%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skill Input Form -->
+        <div class="dash-panel" style="max-width: 820px; margin: 0 auto 3rem auto; padding: 2rem;">
+            <form action="{{ url_for('mentor_match') }}" method="GET" id="matchingForm">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="skillsInput" class="form-label" style="font-size: 0.95rem; font-weight: 700;">
+                        Enter Your Desired Skills (comma-separated):
+                    </label>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <input 
+                            type="text" 
+                            id="skillsInput" 
+                            name="skills" 
+                            class="form-control" 
+                            style="flex: 1; min-width: 260px;" 
+                            placeholder="e.g. Python, AWS, Cloud, React" 
+                            value="{{ skills_query|default('') }}"
+                            required
+                        >
+                        <button type="submit" class="btn btn-primary" style="padding: 0.8rem 1.6rem;">
+                            🎯 Find Matching Mentors
+                        </button>
+                        {% if skills_query %}
+                            <a href="{{ url_for('mentor_match') }}" class="btn btn-outline" style="padding: 0.8rem 1.2rem;">
+                                Clear
+                            </a>
+                        {% endif %}
+                    </div>
+                    <small class="form-hint">Type any skill name or click the quick-select chips below to toggle them.</small>
+                </div>
+
+                <!-- Quick-Select Skill Chips -->
+                <div>
+                    <span style="font-size: 0.84rem; font-weight: 700; color: var(--gray-600); display: block; margin-bottom: 0.6rem;">
+                        Popular Skills (click to add/remove):
+                    </span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="popularChips">
+                        {% for skill in popular_skills %}
+                            <button 
+                                type="button" 
+                                class="skill-chip {% if skill.lower() in skills_query.lower() %}active{% endif %}" 
+                                data-skill="{{ skill }}"
+                                onclick="toggleSkill('{{ skill }}')"
+                                style="cursor: pointer;"
+                            >
+                                + {{ skill }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Matching Results Section -->
+        {% if skills_query %}
+            <div style="margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--dark-900); letter-spacing: -0.3px;">
+                        Matching Results for: 
+                        <span style="color: var(--primary);">{{ skills_query }}</span>
+                    </h3>
+                    <p style="font-size: 0.9rem; color: var(--gray-500); margin-top: 0.2rem;">
+                        Sorted from highest matching score down to lowest.
+                    </p>
+                </div>
+                <span class="user-badge" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">
+                    {{ results|length }} Mentor{{ 's' if results|length != 1 else '' }} Evaluated
+                </span>
+            </div>
+
+            {% if results and results|length > 0 %}
+                <div class="mentors-grid">
+                    {% for item in results %}
+                        {% set mentor = item.mentor %}
+                        {% set score = item.score %}
+                        <div class="mentor-card" style="position: relative; overflow: visible;">
+                            
+                            <!-- Match Score Floating Pill -->
+                            <div style="position: absolute; top: 1.25rem; right: 1.25rem; z-index: 2;">
+                                {% if score == 100 %}
+                                    <span class="status-badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; font-size: 0.82rem; padding: 0.35rem 0.75rem; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);">
+                                        ✨ 100% Match
+                                    </span>
+                                {% elif score >= 50 %}
+                                    <span class="status-badge" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; font-size: 0.82rem; padding: 0.35rem 0.75rem;">
+                                        ⚡ {{ score }}% Match
+                                    </span>
+                                {% elif score > 0 %}
+                                    <span class="status-badge" style="background: #fffbeb; color: #92400e; border: 1px solid #fde68a; font-size: 0.82rem; padding: 0.35rem 0.75rem;">
+                                        🔍 {{ score }}% Match
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge" style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; font-size: 0.82rem; padding: 0.35rem 0.75rem;">
+                                        0% Match
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Header -->
+                            <div class="mentor-card-header">
+                                {% if mentor.profile_pic_url %}
+                                    <img src="{{ mentor.profile_pic_url }}" alt="{{ mentor.name }}" class="mentor-avatar" style="object-fit: cover;">
+                                {% else %}
+                                    <div class="mentor-avatar">{{ mentor.name[:2]|upper }}</div>
+                                {% endif %}
+                                <div class="mentor-intro" style="padding-right: 80px;">
+                                    <h4>{{ mentor.name }} <span class="verified-badge" title="Verified Mentor">✓</span></h4>
+                                    <div class="mentor-role">{{ mentor.title or 'Industry Professional' }}</div>
+                                    <div class="mentor-company">{{ mentor.company or 'Tech Community' }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Match Progress Bar -->
+                            <div style="padding: 0 1.6rem 0.75rem 1.6rem;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--gray-600);">
+                                    <span>Match Compatibility</span>
+                                    <span style="color: {% if score == 100 %}#059669{% elif score >= 50 %}var(--primary){% else %}var(--gray-500){% endif %};">
+                                        {{ score }}%
+                                    </span>
+                                </div>
+                                <div style="width: 100%; height: 8px; background-color: var(--gray-200); border-radius: var(--radius-full); overflow: hidden;">
+                                    <div style="width: {{ score }}%; height: 100%; background: {% if score == 100 %}linear-gradient(90deg, #10b981, #059669){% elif score >= 50 %}linear-gradient(90deg, #4f46e5, #06b6d4){% else %}linear-gradient(90deg, #f59e0b, #d97706){% endif %}; border-radius: var(--radius-full); transition: width 0.6s ease;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="mentor-card-body">
+                                <p class="mentor-bio">
+                                    {{ mentor.bio or 'Available for 1-on-1 mentorship, career advice, and technical guidance.' }}
+                                </p>
+
+                                <!-- Overlapping skills highlighted -->
+                                {% if item.matched_skills %}
+                                    <div style="margin-bottom: 0.85rem;">
+                                        <span style="font-size: 0.75rem; font-weight: 700; color: #065f46; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 0.35rem;">
+                                            ✓ Matched Skills ({{ item.matched_skills|length }}):
+                                        </span>
+                                        <div class="mentor-skills">
+                                            {% for ms in item.matched_skills %}
+                                                <span class="skill-tag" style="background-color: #ecfdf5; color: #065f46; border-color: #a7f3d0; font-weight: 700;">
+                                                    ✓ {{ ms }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Other mentor skills -->
+                                {% if item.all_skills %}
+                                    <div>
+                                        <span style="font-size: 0.74rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 0.35rem;">
+                                            All Mentor Skills:
+                                        </span>
+                                        <div class="mentor-skills">
+                                            {% for s in item.all_skills %}
+                                                {% if s not in item.matched_skills %}
+                                                    <span class="skill-tag" style="opacity: 0.85;">{{ s }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="mentor-card-footer">
+                                <span style="font-size: 0.82rem; color: var(--gray-500); font-weight: 500;">
+                                    🕒 {{ mentor.availability or 'Flexible' }}
+                                </span>
+                                <a href="{{ url_for('mentor_profile', mentor_id=mentor.user_id) }}" class="btn btn-sm btn-primary">
+                                    View & Connect &rarr;
+                                </a>
+                            </div>
+
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state" style="background: white; border-radius: var(--radius-lg); border: 1px solid var(--gray-200); padding: 3rem 1.5rem; max-width: 600px; margin: 2rem auto;">
+                    <span class="empty-icon">🔍</span>
+                    <h3>No matching mentors found</h3>
+                    <p>Try searching for broader skills like <em>Python</em>, <em>Web</em>, or <em>Cloud</em>.</p>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Initial State: Prompt to select skills -->
+            <div style="text-align: center; max-width: 600px; margin: 1rem auto 3rem auto; padding: 2.5rem 1.5rem; background: white; border-radius: var(--radius-xl); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);">
+                <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">👆</div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--dark-900); margin-bottom: 0.5rem;">
+                    Select or type your skills above
+                </h3>
+                <p style="font-size: 0.92rem; color: var(--gray-600); line-height: 1.6; margin-bottom: 1.25rem;">
+                    For example, try typing <strong>Python, AWS, Cloud</strong> or click from the popular skills chips to see instant ranked match scores!
+                </p>
+                <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="{{ url_for('mentor_match', skills='Python, AWS, Cloud') }}" class="btn btn-sm btn-outline">
+                        Try example: Python, AWS, Cloud
+                    </a>
+                    <a href="{{ url_for('mentor_match', skills='JavaScript, React, Node.js') }}" class="btn btn-sm btn-outline">
+                        Try example: JavaScript, React, Node.js
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<!-- Interactive Skill Chip Script -->
+<script>
+function toggleSkill(skill) {
+    const input = document.getElementById('skillsInput');
+    let current = input.value.split(',').map(s => s.trim()).filter(Boolean);
+    const lowerCurrent = current.map(s => s.toLowerCase());
+    const idx = lowerCurrent.indexOf(skill.toLowerCase());
+
+    if (idx >= 0) {
+        current.splice(idx, 1);
+    } else {
+        current.push(skill);
+    }
+
+    input.value = current.join(', ');
+
+    // Update chip styling
+    document.querySelectorAll('.skill-chip').forEach(chip => {
+        const chipSkill = chip.getAttribute('data-skill');
+        if (current.map(s => s.toLowerCase()).includes(chipSkill.toLowerCase())) {
+            chip.classList.add('active');
+        } else {
+            chip.classList.remove('active');
+        }
+    });
+}
+</script>
+
+<style>
+.skill-chip {
+    padding: 0.35rem 0.85rem;
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-full);
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--dark-700);
+    transition: var(--transition);
+}
+
+.skill-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background-color: var(--primary-light);
+}
+
+.skill-chip.active {
+    background-color: var(--primary);
+    color: white !important;
+    border-color: var(--primary);
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+}
+</style>
+{% endblock %}

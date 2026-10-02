@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MentorConnect - Mentor-Mentee Relationship Platform{% endblock %}</title>
+    <!-- Modern Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- 1. Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="{{ url_for('home') }}" class="brand-logo">
+                <span class="brand-icon">M</span>
+                Mentor<span>Connect</span>
+            </a>
+
+            <!-- Mobile menu button -->
+            <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Toggle Navigation">
+                ☰
+            </button>
+
+            <div class="nav-menu" id="navMenu">
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('home') }}" class="nav-link">Home</a></li>
+                    <li><a href="{{ url_for('home') }}#about" class="nav-link">About</a></li>
+                    <li><a href="{{ url_for('mentor_list') }}" class="nav-link">Find Mentors</a></li>
+                    <li><a href="{{ url_for('mentor_match') }}" class="nav-link">🎯 Match Mentors</a></li>
+                    <li><a href="{{ url_for('home') }}#how-it-works" class="nav-link">How It Works</a></li>
+                    {% if session.get('is_admin') %}
+                        <li><a href="{{ url_for('admin_verifications') }}" class="nav-link" style="color: #b45309; font-weight: 700;">🛡️ Verifications</a></li>
+                    {% endif %}
+                    {% if session.get('user_id') and not session.get('is_admin') %}
+                        <li><a href="{{ url_for('dashboard') }}" class="nav-link" style="color: var(--primary); font-weight: 700;">My Dashboard</a></li>
+                    {% endif %}
+                </ul>
+
+                <div class="nav-actions">
+                    {% if session.get('user_id') %}
+                        <div class="user-badge">
+                            <span>{% if session.get('is_admin') %}🛡️{% elif session.get('user_role') == 'mentor' %}💼{% else %}🎓{% endif %}</span>
+                            <span>{{ session.get('user_name') }}</span>
+                        </div>
+                        <form action="{{ url_for('logout') }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-outline btn-sm" style="cursor: pointer;">Log Out</button>
+                        </form>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-outline">Log In</a>
+                        <a href="{{ url_for('register') }}" class="btn btn-primary">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash message alerts -->
+    <div class="container flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Page Content Block -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>Mentor<span>Connect</span></h3>
+                    <p>
+                        A dedicated platform connecting aspiring students and junior developers with experienced industry mentors for personalized career growth and guidance.
+                    </p>
+                </div>
+                <div class="footer-column">
+                    <h4>For Mentees</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('mentor_list') }}">Find a Mentor</a></li>
+                        <li><a href="{{ url_for('home') }}#how-it-works">How It Works</a></li>
+                        <li><a href="{{ url_for('register', role='mentee') }}">Student Sign Up</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>For Mentors</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('register', role='mentor') }}">Become a Mentor</a></li>
+                        <li><a href="{{ url_for('home') }}#about">Community Guidelines</a></li>
+                        <li><a href="{{ url_for('home') }}#about">Mentor Benefits</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Platform</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('home') }}#about">About Project</a></li>
+                        <li><a href="{{ url_for('mentor_list') }}">Explore Directory</a></li>
+                        {% if session.get('user_id') %}
+                            <li><a href="{{ url_for('dashboard') }}">My Dashboard</a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('login') }}">Account Login</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 MentorConnect. Created for web development learning & college project.</p>
+                <p>Built with Python Flask, HTML5, CSS3, & SQLite.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Client-side JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

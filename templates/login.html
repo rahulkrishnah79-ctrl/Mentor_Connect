@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In - MentorConnect{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-subtitle">Log in to your MentorConnect account</p>
+        </div>
+
+        <form action="{{ url_for('login') }}" method="POST" class="auth-form" novalidate>
+            <!-- Email Address -->
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-control" 
+                    placeholder="name@example.com" 
+                    value="{{ email|default('') }}" 
+                    required
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-control" 
+                    placeholder="Enter your password" 
+                    required
+                >
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 0.5rem;">
+                Log In
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Don't have an account yet? <a href="{{ url_for('register') }}">Sign Up</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

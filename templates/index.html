@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}MentorConnect - Empowering Mentorship for Future Tech Leaders{% endblock %}
+
+{% block content %}
+<!-- 2. Hero Section -->
+<section class="hero">
+    <div class="container hero-content">
+        <div class="hero-badge">
+            <span>✨</span> Built for Students & Aspiring Developers
+        </div>
+        <h1 class="hero-title">
+            Unlock Your Potential with <br>
+            <span class="gradient-text">1-on-1 Tech Mentorship</span>
+        </h1>
+        <p class="hero-subtitle">
+            Connect with seasoned engineers, designers, and tech professionals. Get resume reviews, interview preparation, and real-time guidance tailored to your goals.
+        </p>
+        <div class="hero-cta">
+            <a href="#mentors" class="btn btn-primary btn-lg">Explore Mentors</a>
+            <a href="{{ url_for('register', role='mentor') }}" class="btn btn-secondary btn-lg">Become a Mentor</a>
+        </div>
+
+        <!-- Metric counter bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Verified Mentors</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">300+</div>
+                <div class="stat-label">Sessions Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">4.9 / 5</div>
+                <div class="stat-label">Average Satisfaction</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3. About Section -->
+<section class="section" id="about">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">About the Platform</span>
+            <h2 class="section-title">Bridging the Gap Between College & Industry</h2>
+            <p class="section-subtitle">
+                MentorConnect simplifies professional networking and knowledge sharing through organized, scheduled mentorship.
+            </p>
+        </div>
+
+        <div class="about-grid">
+            <div class="about-card">
+                <div class="about-card-icon">🎓</div>
+                <h3>For Aspiring Mentees</h3>
+                <p>
+                    Transitioning from classroom theory to software engineering can feel overwhelming. Get direct answers from professionals who have walked the path.
+                </p>
+                <ul class="about-checklist">
+                    <li>1-on-1 code reviews and architecture guidance</li>
+                    <li>Tailored mock technical and HR interviews</li>
+                    <li>Clear roadmap for campus placements and internships</li>
+                </ul>
+            </div>
+
+            <div class="about-card">
+                <div class="about-card-icon">💡</div>
+                <h3>For Industry Mentors</h3>
+                <p>
+                    Share your experience, hone your coaching and leadership skills, and give back to enthusiastic learners eager to grow.
+                </p>
+                <ul class="about-checklist">
+                    <li>Flexible scheduling that respects your work hours</li>
+                    <li>Review incoming mentee requests before accepting</li>
+                    <li>Help shape the next generation of engineers</li>
+                </ul>
+            </div>
+
+            <div class="about-card">
+                <div class="about-card-icon">⚡</div>
+                <h3>Simple 3-Step Process</h3>
+                <p>
+                    No endless back-and-forth emails. Discover, request, and book sessions seamlessly within one centralized dashboard.
+                </p>
+                <ul class="about-checklist">
+                    <li>Filter mentors by relevant tech stack</li>
+                    <li>Send introductory requests with your questions</li>
+                    <li>Confirm calendar sessions once accepted</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 4. Mentor Cards Section -->
+<section class="section mentors-section" id="mentors">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Featured Experts</span>
+            <h2 class="section-title">Meet Our Mentors</h2>
+            <p class="section-subtitle">
+                Learn from engineers and leaders working in top tech companies and innovative startups.
+            </p>
+        </div>
+
+        <!-- Live client-side skill filter input -->
+        <div class="mentors-search-box">
+            <input 
+                type="text" 
+                id="mentorSearchInput" 
+                class="mentors-search-input" 
+                placeholder="🔍 Search mentors by skill (e.g. Python, React, Cloud)..."
+            >
+        </div>
+
+        <!-- Mentors Card Grid -->
+        <div class="mentors-grid" id="mentorsGrid">
+            
+            <!-- Mentor 1 -->
+            <div class="mentor-card" data-skills="python backend flask django aws sql">
+                <div class="mentor-card-header">
+                    <div class="mentor-avatar">SC</div>
+                    <div class="mentor-intro">
+                        <h4>Sarah Chen <span class="verified-badge" title="Verified Mentor">✓</span></h4>
+                        <div class="mentor-role">Senior Backend Engineer</div>
+                        <div class="mentor-company">Google Cloud</div>
+                    </div>
+                </div>
+                <div class="mentor-card-body">
+                    <p class="mentor-bio">
+                        Passionate about microservices, scalable distributed systems, and helping students master backend engineering.
+                    </p>
+                    <div class="mentor-skills">
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">Flask</span>
+                        <span class="skill-tag">AWS</span>
+                        <span class="skill-tag">PostgreSQL</span>
+                    </div>
+                </div>
+                <div class="mentor-card-footer">
+                    <div class="mentor-rating">
+                        <span class="star-icon">★</span> 4.9 <span class="sessions-count">(42 sessions)</span>
+                    </div>
+                    <a href="{{ url_for('register', role='mentee') }}" class="btn btn-sm btn-primary">Connect</a>
+                </div>
+            </div>
+
+            <!-- Mentor 2 -->
+            <div class="mentor-card" data-skills="javascript react node frontend web typescript">
+                <div class="mentor-card-header">
+                    <div class="mentor-avatar" style="background: linear-gradient(135deg, #0ea5e9, #10b981);">RS</div>
+                    <div class="mentor-intro">
+                        <h4>Rahul Sharma <span class="verified-badge" title="Verified Mentor">✓</span></h4>
+                        <div class="mentor-role">Full Stack Architect</div>
+                        <div class="mentor-company">Microsoft</div>
+                    </div>
+                </div>
+                <div class="mentor-card-body">
+                    <p class="mentor-bio">
+                        5+ years experience building modern web apps. I mentor students on clean code, React architecture, and tech interviews.
+                    </p>
+                    <div class="mentor-skills">
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">Node.js</span>
+                        <span class="skill-tag">TypeScript</span>
+                    </div>
+                </div>
+                <div class="mentor-card-footer">
+                    <div class="mentor-rating">
+                        <span class="star-icon">★</span> 5.0 <span class="sessions-count">(68 sessions)</span>
+                    </div>
+                    <a href="{{ url_for('register', role='mentee') }}" class="btn btn-sm btn-primary">Connect</a>
+                </div>
+            </div>
+
+            <!-- Mentor 3 -->
+            <div class="mentor-card" data-skills="ui ux design figma frontend user research product">
+                <div class="mentor-card-header">
+                    <div class="mentor-avatar" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);">PP</div>
+                    <div class="mentor-intro">
+                        <h4>Priya Patel <span class="verified-badge" title="Verified Mentor">✓</span></h4>
+                        <div class="mentor-role">Lead Product Designer</div>
+                        <div class="mentor-company">Fintech Labs</div>
+                    </div>
+                </div>
+                <div class="mentor-card-body">
+                    <p class="mentor-bio">
+                        Helps budding designers and developers turn ideas into intuitive, accessible, and high-converting user interfaces.
+                    </p>
+                    <div class="mentor-skills">
+                        <span class="skill-tag">UI/UX</span>
+                        <span class="skill-tag">Figma</span>
+                        <span class="skill-tag">Design Systems</span>
+                        <span class="skill-tag">CSS3</span>
+                    </div>
+                </div>
+                <div class="mentor-card-footer">
+                    <div class="mentor-rating">
+                        <span class="star-icon">★</span> 4.8 <span class="sessions-count">(31 sessions)</span>
+                    </div>
+                    <a href="{{ url_for('register', role='mentee') }}" class="btn btn-sm btn-primary">Connect</a>
+                </div>
+            </div>
+
+            <!-- Mentor 4 -->
+            <div class="mentor-card" data-skills="devops docker kubernetes ci/cd cloud linux git">
+                <div class="mentor-card-header">
+                    <div class="mentor-avatar" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">AR</div>
+                    <div class="mentor-intro">
+                        <h4>Alex Rivera <span class="verified-badge" title="Verified Mentor">✓</span></h4>
+                        <div class="mentor-role">Cloud & DevOps Specialist</div>
+                        <div class="mentor-company">Amazon Web Services</div>
+                    </div>
+                </div>
+                <div class="mentor-card-body">
+                    <p class="mentor-bio">
+                        Guiding beginners through containerization, deployment pipelines, infrastructure as code, and cloud certifications.
+                    </p>
+                    <div class="mentor-skills">
+                        <span class="skill-tag">Docker</span>
+                        <span class="skill-tag">Kubernetes</span>
+                        <span class="skill-tag">CI/CD</span>
+                        <span class="skill-tag">Linux</span>
+                    </div>
+                </div>
+                <div class="mentor-card-footer">
+                    <div class="mentor-rating">
+                        <span class="star-icon">★</span> 4.9 <span class="sessions-count">(55 sessions)</span>
+                    </div>
+                    <a href="{{ url_for('register', role='mentee') }}" class="btn btn-sm btn-primary">Connect</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Call to action banner -->
+<section class="section" id="how-it-works" style="background-color: var(--bg-surface); border-top: 1px solid var(--gray-200);">
+    <div class="container" style="text-align: center; max-width: 700px;">
+        <span class="section-tag">Get Started Today</span>
+        <h2 class="section-title">Ready to Begin Your Mentorship Journey?</h2>
+        <p class="section-subtitle" style="margin-bottom: 2rem;">
+            Whether you want to learn new skills or share your expertise, MentorConnect gives you the tools to succeed.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+            <a href="{{ url_for('register', role='mentee') }}" class="btn btn-primary btn-lg">Join as Mentee</a>
+            <a href="{{ url_for('register', role='mentor') }}" class="btn btn-outline btn-lg">Apply as Mentor</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

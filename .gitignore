@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+mentor_connect.db
+secure_uploads/
+.env

@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - MentorConnect{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card" style="max-width: 680px;">
+        <div class="auth-header">
+            <div class="dashboard-badge mentor-badge">💼 Profile Setup</div>
+            <h2 class="auth-title">Edit Your Mentor Profile</h2>
+            <p class="auth-subtitle">Provide details so mentees can discover you and understand your expertise.</p>
+        </div>
+
+        <form action="{{ url_for('edit_mentor_profile') }}" method="POST" class="auth-form">
+            <!-- Job Title & Company in 2 columns -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="title" class="form-label">Professional Title</label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        class="form-control" 
+                        placeholder="e.g. Senior Software Engineer" 
+                        value="{{ profile.title if profile and profile.title else '' }}"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="company" class="form-label">Company / Organization</label>
+                    <input 
+                        type="text" 
+                        id="company" 
+                        name="company" 
+                        class="form-control" 
+                        placeholder="e.g. Google, Microsoft, Startup" 
+                        value="{{ profile.company if profile and profile.company else '' }}"
+                    >
+                </div>
+            </div>
+
+            <!-- Profile Picture URL -->
+            <div class="form-group">
+                <label for="profile_pic_url" class="form-label">Profile Picture URL</label>
+                <input 
+                    type="url" 
+                    id="profile_pic_url" 
+                    name="profile_pic_url" 
+                    class="form-control" 
+                    placeholder="https://example.com/avatar.jpg" 
+                    value="{{ profile.profile_pic_url if profile and profile.profile_pic_url else '' }}"
+                >
+                <small class="form-hint">Paste a link to your photo (or leave empty to use initials).</small>
+            </div>
+
+            <!-- Bio -->
+            <div class="form-group">
+                <label for="bio" class="form-label">About You / Bio</label>
+                <textarea 
+                    id="bio" 
+                    name="bio" 
+                    rows="4" 
+                    class="form-control" 
+                    placeholder="Briefly introduce your career journey and how you like to help mentees..."
+                >{{ profile.bio if profile and profile.bio else '' }}</textarea>
+            </div>
+
+            <!-- Skills -->
+            <div class="form-group">
+                <label for="skills" class="form-label">Skills & Technologies (comma-separated)</label>
+                <input 
+                    type="text" 
+                    id="skills" 
+                    name="skills" 
+                    class="form-control" 
+                    placeholder="e.g. Python, Flask, React, System Design, Docker" 
+                    value="{{ profile.skills if profile and profile.skills else '' }}"
+                    required
+                >
+                <small class="form-hint">Separate skills with commas. This enables mentees to search for you by skill.</small>
+            </div>
+
+            <!-- Experience & Education in 2 columns -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="experience" class="form-label">Years of Experience / Background</label>
+                    <input 
+                        type="text" 
+                        id="experience" 
+                        name="experience" 
+                        class="form-control" 
+                        placeholder="e.g. 5+ years in full-stack dev" 
+                        value="{{ profile.experience if profile and profile.experience else '' }}"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="education" class="form-label">Education / Degree</label>
+                    <input 
+                        type="text" 
+                        id="education" 
+                        name="education" 
+                        class="form-control" 
+                        placeholder="e.g. B.Tech Computer Science" 
+                        value="{{ profile.education if profile and profile.education else '' }}"
+                    >
+                </div>
+            </div>
+
+            <!-- Availability & LinkedIn URL -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="availability" class="form-label">Mentorship Availability</label>
+                    <input 
+                        type="text" 
+                        id="availability" 
+                        name="availability" 
+                        class="form-control" 
+                        placeholder="e.g. Weekends, 2 hrs/week" 
+                        value="{{ profile.availability if profile and profile.availability else '' }}"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="linkedin_url" class="form-label">LinkedIn Profile URL</label>
+                    <input 
+                        type="url" 
+                        id="linkedin_url" 
+                        name="linkedin_url" 
+                        class="form-control" 
+                        placeholder="https://linkedin.com/in/username" 
+                        value="{{ profile.linkedin_url if profile and profile.linkedin_url else '' }}"
+                    >
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary btn-lg" style="flex: 2;">Save Profile</button>
+                <a href="{{ url_for('mentor_dashboard') }}" class="btn btn-outline btn-lg" style="flex: 1; text-align: center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

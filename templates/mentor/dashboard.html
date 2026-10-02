@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Mentor Dashboard - MentorConnect{% endblock %}
+
+{% block content %}
+<div class="dashboard-container container">
+
+    <!-- 1. Welcome Message & Quick Action Buttons Banner -->
+    <div class="dashboard-welcome-banner">
+        <div class="welcome-info">
+            <span class="welcome-badge">💼 Mentor Portal</span>
+            <h1 class="welcome-title">Welcome back, {{ user.name }}!</h1>
+            <p class="welcome-subtitle">
+                Guide the next generation of software engineers. Manage your incoming mentorship requests, view scheduled sessions, and keep your profile up to date.
+            </p>
+        </div>
+        <div class="quick-actions-bar">
+            <a href="{{ url_for('edit_mentor_profile') }}" class="btn btn-white">
+                ✏️ Edit Profile
+            </a>
+            <a href="{{ url_for('mentor_profile', mentor_id=user.id) }}" class="btn btn-ghost-white">
+                👁️ Public Profile
+            </a>
+            <a href="#requests-section" class="btn btn-ghost-white">
+                📬 Review Requests
+            </a>
+        </div>
+    </div>
+
+    <!-- Mentor Verification Status Banner -->
+    {% if user.verification_status == 'Verified' %}
+        <div class="alert alert-success" style="margin-bottom: 2rem;">
+            <span style="font-size: 1.25rem;">✅</span>
+            <div>
+                <strong>Verification Status: Verified Mentor</strong>
+                <p style="font-size: 0.86rem; margin-top: 0.2rem;">Your credentials and photo ID have been approved by administration. You are active in mentor discovery and ready to receive mentorship requests.</p>
+            </div>
+        </div>
+    {% elif user.verification_status == 'Rejected' %}
+        <div class="alert alert-danger" style="margin-bottom: 2rem;">
+            <span style="font-size: 1.25rem;">❌</span>
+            <div>
+                <strong>Verification Status: Verification Declined</strong>
+                <p style="font-size: 0.86rem; margin-top: 0.2rem;">Your mentor ID verification was declined by administration. Please contact platform support or update your profile.</p>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning" style="margin-bottom: 2rem;">
+            <span style="font-size: 1.25rem;">⏳</span>
+            <div>
+                <strong>Verification Status: Pending Administrative Review</strong>
+                <p style="font-size: 0.86rem; margin-top: 0.2rem;">Your photo ID proof is currently being reviewed by our administration. Once verified, your profile will appear in mentor discovery and students will be able to request mentorship.</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- 2. Profile Completion Card -->
+    <div class="profile-progress-card">
+        <div class="progress-info">
+            <div class="progress-header">
+                <span class="progress-title">Profile Strength & Completion</span>
+                <span class="progress-pct">{{ completion_pct }}% Complete</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ completion_pct }}%;"></div>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--gray-500); margin-top: 0.5rem;">
+                {% if completion_pct == 100 %}
+                    🎉 Outstanding! Your profile is 100% complete and prominently featured in search results.
+                {% elif completion_pct >= 60 %}
+                    👍 Good progress! Add your education, bio, and LinkedIn to reach 100% completion.
+                {% else %}
+                    🚀 Your profile needs attention! Add your skills, experience, and availability so mentees can discover you.
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <a href="{{ url_for('edit_mentor_profile') }}" class="btn btn-sm btn-outline">
+                {% if completion_pct == 100 %}Update Details{% else %}Complete Profile{% endif %}
+            </a>
+        </div>
+    </div>
+
+    <!-- 3. Key Metrics & KPI Stats Grid -->
+    <div class="dashboard-stats-grid">
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background-color: #fef3c7; color: #92400e;">📬</div>
+            <div class="dash-stat-info">
+                <h3>{{ pending_count }}</h3>
+                <p>Pending Requests</p>
+            </div>
+        </div>
+
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background-color: #d1fae5; color: #065f46;">🤝</div>
+            <div class="dash-stat-info">
+                <h3>{{ accepted_count }}</h3>
+                <p>Accepted Mentees</p>
+            </div>
+        </div>
+
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background-color: #dbeafe; color: #1e40af;">📅</div>
+            <div class="dash-stat-info">
+                <h3>{{ sessions|length if sessions else 0 }}</h3>
+                <p>Upcoming Sessions</p>
+            </div>
+        </div>
+
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background-color: #e0e7ff; color: #4338ca;">⭐</div>
+            <div class="dash-stat-info">
+                <h3>5.0</h3>
+                <p>Mentor Rating</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Main Content Panels -->
+    <div class="dash-panels-grid">
+        
+        <!-- Scheduled Upcoming Sessions Panel -->
+        <div class="dash-panel" id="sessions-section">
+            <div class="dash-panel-header">
+                <h3>🗓️ Upcoming Mentorship Sessions ({{ sessions|length if sessions else 0 }})</h3>
+                <span style="font-size: 0.85rem; color: var(--gray-500);">Scheduled meetings</span>
+            </div>
+            <div class="dash-panel-body">
+                {% if sessions and sessions|length > 0 %}
+                    <div class="requests-list">
+                        {% for s in sessions %}
+                            <div class="request-card" style="border-left: 4px solid var(--primary);">
+                                <div class="request-card-header">
+                                    <div class="request-sender-info">
+                                        <h4>{{ s.topic }}</h4>
+                                        <p>
+                                            Mentee: <strong>{{ s.mentee_name }}</strong> ({{ s.mentee_email }})
+                                        </p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span class="status-badge status-accepted">{{ s.status }}</span>
+                                        <div style="font-size: 0.88rem; font-weight: 700; color: var(--primary); margin-top: 0.25rem;">
+                                            📅 {{ s.session_date }} at 🕒 {{ s.session_time }}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if s.description %}
+                                    <div class="request-message-box">
+                                        <strong>Session Agenda:</strong><br>
+                                        {{ s.description }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <span class="empty-icon">🗓️</span>
+                        <h4>No sessions scheduled yet</h4>
+                        <p>When accepted mentees book slots with you, their session agendas and dates will appear here.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Incoming Mentorship Requests Panel -->
+        <div class="dash-panel" id="requests-section">
+            <div class="dash-panel-header">
+                <h3>📬 Incoming Mentorship Requests ({{ requests|length if requests else 0 }})</h3>
+                <span style="font-size: 0.85rem; color: var(--gray-500);">Awaiting action</span>
+            </div>
+            <div class="dash-panel-body">
+                {% if requests and requests|length > 0 %}
+                    <div class="requests-list">
+                        {% for req in requests %}
+                            <div class="request-card">
+                                <div class="request-card-header">
+                                    <div class="request-sender-info">
+                                        <h4>{{ req.mentee_name }}</h4>
+                                        <p>Email: {{ req.mentee_email }} &bull; Sent on: {{ req.created_at[:16] }}</p>
+                                    </div>
+                                    <div>
+                                        {% if req.status == 'PENDING' %}
+                                            <span class="status-badge status-pending">PENDING</span>
+                                        {% elif req.status == 'ACCEPTED' %}
+                                            <span class="status-badge status-accepted">ACCEPTED</span>
+                                        {% elif req.status == 'REJECTED' %}
+                                            <span class="status-badge status-rejected">REJECTED</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="request-message-box">
+                                    <strong>Introduction Note:</strong><br>
+                                    {{ req.message }}
+                                </div>
+
+                                {% if req.status == 'PENDING' %}
+                                    <div class="request-actions">
+                                        <form action="{{ url_for('accept_request', request_id=req.id) }}" method="POST" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-success">✓ Accept Request</button>
+                                        </form>
+                                        <form action="{{ url_for('reject_request', request_id=req.id) }}" method="POST" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger">✗ Reject Request</button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <p style="font-size: 0.82rem; color: var(--gray-500);">
+                                        This request was marked as <strong>{{ req.status }}</strong>.
+                                    </p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <span class="empty-icon">📭</span>
+                        <h4>No mentorship requests yet</h4>
+                        <p>When mentees request your guidance, their requests will appear here with options to accept or reject.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
